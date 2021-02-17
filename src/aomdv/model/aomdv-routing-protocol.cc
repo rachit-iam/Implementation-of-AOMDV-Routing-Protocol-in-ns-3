@@ -501,6 +501,8 @@ RoutingProtocol::RouteInput (Ptr<const Packet> p, const Ipv4Header &header,
     }
 
   // Unicast local delivery
+  // TODO CHANGES REQUIRED IF IT IS DESTINATION
+  // ! ALSO CHANGES IN PATH INSERTIONS
   if (m_ipv4->IsDestinationAddress (dst, iif))
     {
       UpdatePathsLifeTime (origin, m_activeRouteTimeout);
@@ -1091,6 +1093,7 @@ RoutingProtocol::RecvAomdv (Ptr<Socket> socket)
     }
 }
 
+// * WHAT IS THE USE OF UPDATING LIFETIME OF A ROUTE INSTEAD OF A PATH 
 bool
 RoutingProtocol::UpdateRouteLifeTime (Ipv4Address addr, Time lifetime)
 {
@@ -1221,7 +1224,7 @@ RoutingProtocol::RecvRequest (Ptr<Packet> p, Ipv4Address receiver, Ipv4Address s
       killRequestPropagation = true;
     }
   
-   if (rreqHeader.GetHopCount () == 0) 
+   if (rreqHeader.GetHopCount () == 0) // * only when he current node is the neighbour of the source(origin) thats why its hop count is zero and then the current node will be the first hop in all paths originated from here
     {
       rreqHeader.SetFirstHop (receiver);
       //rq->rq_first_hop = index;
@@ -1711,7 +1714,7 @@ RoutingProtocol::RecvReply (Ptr<Packet> p, Ipv4Address receiver, Ipv4Address sen
   RoutingTableEntry toOrigin;
   uint32_t id = rrepHeader.GetRequestID ();
   b = m_rreqIdCache.GetId (dst, id);
-  #ifdef AOMDV_NODE_DISJOINT_PATHS
+  #ifdef AOMDV_NODE_DISJOINT_PATHS 
   if (!m_routingTable.LookupRoute (rrepHeader.GetOrigin (), toOrigin) || (toOrigin.GetFlag () != VALID)
       || (b == NULL) || (b->count))
     {
@@ -1756,7 +1759,7 @@ RoutingProtocol::RecvReply (Ptr<Packet> p, Ipv4Address receiver, Ipv4Address sen
           break;
         }
     }
-
+  //todo maybe some error above
   /* If an unused reverse path is found and the forward path (for 
      this RREP) has not already been replied - forward the RREP. */
   if (reversePath && b->ForwardPathLookup (forwardPath->GetNextHop (), &rt, forwardPath->GetLastHop () == NULL)
@@ -1983,6 +1986,7 @@ RoutingProtocol::AckTimerExpire (Ipv4Address neighbor, Time blacklistTimeout)
   m_routingTable.MarkLinkAsUnidirectional (neighbor, blacklistTimeout);
 }
 
+//todo setipttl tag used only once but in aodv it was used many times
 void
 RoutingProtocol::SendHello ()
 {

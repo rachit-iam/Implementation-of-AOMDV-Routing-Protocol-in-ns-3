@@ -96,6 +96,7 @@ RoutingTableEntry::PrintPaths()
     }
 }
 
+// TODO major changes here
 struct RoutingTableEntry::Path* 
 RoutingTableEntry::PathInsert (Ptr<NetDevice> dev, Ipv4Address nextHop, uint16_t hopCount, 
                                Time expireTime, Ipv4Address lastHop, Ipv4InterfaceAddress iface)
