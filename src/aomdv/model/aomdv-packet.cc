@@ -140,9 +140,11 @@ operator<< (std::ostream & os, TypeHeader const & h)
 // RREQ
 //-----------------------------------------------------------------------------
 RreqHeader::RreqHeader (uint8_t flags, uint8_t reserved, uint8_t hopCount, uint32_t requestID, Ipv4Address dst,
-                        uint32_t dstSeqNo, Ipv4Address origin, uint32_t originSeqNo, Ipv4Address firstHop) :
+                        uint32_t dstSeqNo, Ipv4Address origin, uint32_t originSeqNo, Ipv4Address firstHop,
+                        uint32_t minResidualEnergy) :
   m_flags (flags), m_reserved (reserved), m_hopCount (hopCount), m_requestID (requestID), m_dst (dst),
-  m_dstSeqNo (dstSeqNo), m_origin (origin),  m_originSeqNo (originSeqNo), m_firstHop (firstHop)
+  m_dstSeqNo (dstSeqNo), m_origin (origin),  m_originSeqNo (originSeqNo), m_firstHop (firstHop),
+  m_minResidualEnergy (minResidualEnergy)
 {
 }
 
@@ -167,7 +169,7 @@ RreqHeader::GetInstanceTypeId () const
 uint32_t
 RreqHeader::GetSerializedSize () const
 {
-  return 27;                            //Read the source code
+  return 31;                            //Read the source code
 }
 
 void
@@ -182,6 +184,7 @@ RreqHeader::Serialize (Buffer::Iterator i) const
   WriteTo (i, m_origin);
   i.WriteHtonU32 (m_originSeqNo);
   WriteTo (i, m_firstHop);
+  i.WriteHtonU32 (m_minResidualEnergy);
 }
 
 uint32_t
@@ -197,6 +200,7 @@ RreqHeader::Deserialize (Buffer::Iterator start)
   ReadFrom (i, m_origin);
   m_originSeqNo = i.ReadNtohU32 ();
   ReadFrom (i, m_firstHop);
+  m_minResidualEnergy = i.ReadNtohU32 ();
 
   uint32_t dist = i.GetDistanceFrom (start);
   NS_ASSERT (dist == GetSerializedSize ());
@@ -280,9 +284,9 @@ RreqHeader::operator== (RreqHeader const & o) const
 //-----------------------------------------------------------------------------
 
 RrepHeader::RrepHeader (uint8_t prefixSize, uint8_t hopCount, Ipv4Address dst,
-                        uint32_t dstSeqNo, Ipv4Address origin, uint32_t requestID, Ipv4Address firstHop, Time lifeTime) :
+                        uint32_t dstSeqNo, Ipv4Address origin, uint32_t requestID, Ipv4Address firstHop, Time lifeTime, uint32_t minResidualEnerdy)  :
   m_flags (0), m_prefixSize (prefixSize), m_hopCount (hopCount),
-  m_dst (dst), m_dstSeqNo (dstSeqNo), m_origin (origin), m_requestID (requestID), m_firstHop (firstHop)
+  m_dst (dst), m_dstSeqNo (dstSeqNo), m_origin (origin), m_requestID (requestID), m_firstHop (firstHop), m_minResidualEnergy (minResidualEnerdy)
 {
   m_lifeTime = uint32_t (lifeTime.GetMilliSeconds ());
 }
@@ -308,7 +312,7 @@ RrepHeader::GetInstanceTypeId () const
 uint32_t
 RrepHeader::GetSerializedSize () const
 {
-  return 27;
+  return 31;
 }
 
 void
@@ -323,6 +327,7 @@ RrepHeader::Serialize (Buffer::Iterator i) const
   i.WriteHtonU32 (m_requestID);
   WriteTo (i, m_firstHop);
   i.WriteHtonU32 (m_lifeTime);
+  i.WriteHtonU32 (m_minResidualEnergy);
 }
 
 uint32_t
@@ -339,6 +344,7 @@ RrepHeader::Deserialize (Buffer::Iterator start)
   m_requestID = i.ReadNtohU32 ();
   ReadFrom (i, m_firstHop);
   m_lifeTime = i.ReadNtohU32 ();
+  m_minResidualEnergy = i.ReadNtohU32 ();
 
   uint32_t dist = i.GetDistanceFrom (start);
   NS_ASSERT (dist == GetSerializedSize ());

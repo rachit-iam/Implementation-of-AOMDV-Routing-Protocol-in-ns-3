@@ -84,6 +84,7 @@ public:
     uint16_t m_hopCount;   // hopcount through this nexthop
     Time m_expire;     // expiration timeout
     Ipv4Address m_lastHop;    // lasthop address
+    uint32_t m_minResidualEnergy;//min energy along this path excluding itself
     /// Output interface address
     Ipv4InterfaceAddress m_iface;
     Time m_ts;         // time when we saw this nexthop
@@ -91,7 +92,7 @@ public:
     bool m_pathError;
 
     Path (Ptr<NetDevice> dev, Ipv4Address dst, Ipv4Address nextHop, uint16_t hopCount, Time expireTime, 
-          Ipv4Address lastHop, Ipv4InterfaceAddress iface);
+          Ipv4Address lastHop, Ipv4InterfaceAddress iface, uint32_t minResidualEnergy);
 
     Ptr<Ipv4Route> GetRoute () const { return m_ipv4Route; }
     void SetRoute (Ptr<Ipv4Route> r) { m_ipv4Route = r; }
@@ -107,6 +108,8 @@ public:
     void SetInterface (Ipv4InterfaceAddress iface) { m_iface = iface; }
     void SetExpire (Time et) { m_expire = et + Simulator::Now (); }
     Time GetExpire () const { return m_expire - Simulator::Now (); }
+    void SetMinResidualEnergy(uint_32t e) { m_minResidualEnergy = e; }
+    uint_32t GetMinResidualEnergy () const { return m_minResidualEnergy; }
   
     void Print (Ptr<OutputStreamWrapper> stream) const;
 
@@ -116,7 +119,7 @@ public:
   /// Path functions - contribution
   void PrintPaths ();
   struct Path* PathInsert (Ptr<NetDevice> dev, Ipv4Address nextHop, uint16_t hopCount, 
-                           Time expireTime, Ipv4Address lastHop, Ipv4InterfaceAddress iface);
+                           Time expireTime, Ipv4Address lastHop, Ipv4InterfaceAddress iface, uint32_t minResidualEnergy);
   struct Path* PathLookup (Ipv4Address id);
   struct Path* PathLookupDisjoint (Ipv4Address nh, Ipv4Address lh);
   bool PathNewDisjoint (Ipv4Address nh, Ipv4Address lh);
@@ -132,7 +135,7 @@ public:
   uint16_t PathGetMinHopCount (void);  
   Time PathGetMaxExpirationTime (void); 
   void PathPurge (void);
-
+  //TODO ADD SOME FUNCTIONS FOR ENERGY ALSO
 
 
   ///\name Precursors management
@@ -191,7 +194,7 @@ public:
   bool IsUnidirectional () const { return m_blackListState; }
   void SetBlacklistTimeout (Time t) { m_blackListTimeout = t; }
   Time GetBlacklistTimeout () const { return m_blackListTimeout; }
-  void SetAdvertisedHopCount (uint32_t ahc ) { m_advertisedHopCount = ahc; }
+  void SetAdvertisedHopCount (uint32_t ahc ) { m_advertisedHopCount = ahc; } //TODO HAVE TO MAKE SOME TYPE OF ADVERTISED MIN_RESIDUAL_ENERGY
   uint32_t GetAdvertisedHopCount () const { return m_advertisedHopCount; }
   void SetHighestSequenceNumberHeard (uint32_t hsh ) { m_highestSeqnoHeard = hsh; }
   uint32_t GetHighestSequenceNumberHeard () const { return m_highestSeqnoHeard; }
@@ -249,7 +252,7 @@ private:
   Time m_blackListTimeout;
 
   //AOMDV
-  uint16_t  m_advertisedHopCount;
+  uint16_t  m_advertisedHopCount;//TODO ADVERTISED ENERGY SAME LIKE HOP COUNT
   uint32_t  m_highestSeqnoHeard;
   uint32_t  m_lastHopCount;  
   int  m_numPaths;
@@ -339,7 +342,7 @@ inline bool operator == (const RoutingTableEntry::Path &a, const RoutingTableEnt
   {
     return (a.m_ipv4Route == b.m_ipv4Route && a.m_hopCount == b.m_hopCount && 
             a.m_expire == b.m_expire && a.m_lastHop == b.m_lastHop && a.m_iface == b.m_iface 
-            && a.m_ts == b.m_ts && a.m_pathError == b.m_pathError);
+            && a.m_ts == b.m_ts && a.m_pathError == b.m_pathError && a.m_minResidualEnergy == b.m_minResidualEnergy );
   }
 }
 }

@@ -41,9 +41,9 @@ namespace aomdv
 {
 
 RoutingTableEntry::Path::Path (Ptr<NetDevice> dev, Ipv4Address dst, Ipv4Address nextHop, uint16_t hopCount, 
-                               Time expireTime, Ipv4Address lastHop, Ipv4InterfaceAddress iface) :
+                               Time expireTime, Ipv4Address lastHop, Ipv4InterfaceAddress iface, uint32_t minResidualEnergy) :
   m_hopCount (hopCount), m_expire (expireTime + Simulator::Now ()), m_lastHop (lastHop), 
-  m_iface (iface), m_ts(Simulator::Now ()), m_pathError(false)
+  m_iface (iface), m_ts(Simulator::Now ()), m_pathError(false), m_minResidualEnergy(minResidualEnergy)
 {
   m_ipv4Route = Create<Ipv4Route> ();
   m_ipv4Route->SetDestination (dst);
@@ -62,6 +62,7 @@ RoutingTableEntry::Path::Print (Ptr<OutputStreamWrapper> stream) const
   *os << std::setiosflags (std::ios::fixed) << 
   std::setiosflags (std::ios::left) << std::setprecision (2) <<
   std::setw (14) << (m_expire - Simulator::Now ()).GetSeconds ();
+  *os << "\t" << m_minResidualEnergy;
   *os << "\t" << m_hopCount << "\n";
 }
 
@@ -92,16 +93,16 @@ RoutingTableEntry::PrintPaths()
 {
   for (std::vector<Path>::const_iterator i = m_pathList.begin(); i != m_pathList.end(); ++i) 
     {
-      std::cout<<i->GetNextHop ()<<" "<<i->m_hopCount<<" "<<i->m_lastHop;  
+      std::cout<<i->GetNextHop ()<<" "<<i->m_hopCount<<" " <<i->m_minResidualEnergy <<" " <<i->m_lastHop;  
     }
 }
 
 // TODO major changes here
 struct RoutingTableEntry::Path* 
 RoutingTableEntry::PathInsert (Ptr<NetDevice> dev, Ipv4Address nextHop, uint16_t hopCount, 
-                               Time expireTime, Ipv4Address lastHop, Ipv4InterfaceAddress iface)
+                               Time expireTime, Ipv4Address lastHop, Ipv4InterfaceAddress iface, uint32_t minResidualEnergy)
 {
-  Path path(dev, m_dst, nextHop, hopCount, expireTime, lastHop, iface);
+  Path path(dev, m_dst, nextHop, hopCount, expireTime, lastHop, iface, minResidualEnergy);
   m_pathList.push_back (path);
   m_numPaths += 1;     //TODO
   //RoutingTableEntry::Path *p = (struct RoutingTableEntry::Path*)malloc(sizeof(struct RoutingTableEntry::Path));
@@ -177,7 +178,7 @@ RoutingTableEntry::PathLookupLastHop (Ipv4Address id)
   return NULL;
 }
 
-//TODO
+//TODO 
 void 
 RoutingTableEntry::PathDelete (Ipv4Address id)
 {
@@ -213,7 +214,7 @@ RoutingTableEntry::PathAllDelete (void)
   m_pathList.clear (); 
   m_numPaths = 0;
 }
-
+//todo pathdelete_maxenergy
 void 
 RoutingTableEntry::PathDeleteLongest (void)
 {
@@ -243,6 +244,7 @@ RoutingTableEntry::PathEmpty (void) const
   return m_pathList.empty ();
 }
 
+//todo have to change pathfind that is used in route input output methods in routing protocol
 struct RoutingTableEntry::Path * 
 RoutingTableEntry::PathFind (void) 
 {
@@ -252,6 +254,7 @@ RoutingTableEntry::PathFind (void)
   return path;
 }
 
+//todo min energy
 struct RoutingTableEntry::Path* 
 RoutingTableEntry::PathFindMinHop (void)
 {
@@ -267,7 +270,7 @@ RoutingTableEntry::PathFindMinHop (void)
   }
   return path;
 }
-
+//todo similarly for energy
 uint16_t 
 RoutingTableEntry::PathGetMaxHopCount (void)
 {

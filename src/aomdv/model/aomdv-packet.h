@@ -106,7 +106,8 @@ public:
   RreqHeader (uint8_t flags = 0, uint8_t reserved = 0, uint8_t hopCount = 0,
               uint32_t requestID = 0, Ipv4Address dst = Ipv4Address (),
               uint32_t dstSeqNo = 0, Ipv4Address origin = Ipv4Address (),
-              uint32_t originSeqNo = 0, Ipv4Address firstHop = Ipv4Address());
+              uint32_t originSeqNo = 0, Ipv4Address firstHop = Ipv4Address(),
+              uint32_t minResidualEnergy = 0);
 
   ///\name Header serialization/deserialization
   //\{
@@ -134,6 +135,8 @@ public:
   uint32_t GetOriginSeqno () const { return m_originSeqNo; }
   void SetFirstHop (Ipv4Address a) { m_firstHop = a; }
   Ipv4Address GetFirstHop () const { return m_firstHop; }
+  void SetMinResidualEnergy(uint_32t e) { m_minResidualEnergy = e; }
+  uint_32t GetMinResidualEnergy () const { return m_minResidualEnergy; }
   //\}
 
   ///\name Flags
@@ -157,6 +160,7 @@ private:
   Ipv4Address    m_origin;         ///< Originator IP Address
   uint32_t       m_originSeqNo;    ///< Source Sequence Number
   Ipv4Address    m_firstHop;
+  uint_32t       m_minResidualEnergy;
 };
 
 std::ostream & operator<< (std::ostream & os, RreqHeader const &);
@@ -187,7 +191,7 @@ public:
   RrepHeader (uint8_t prefixSize = 0, uint8_t hopCount = 0, Ipv4Address dst =
                 Ipv4Address (), uint32_t dstSeqNo = 0, Ipv4Address origin =
                 Ipv4Address (), uint32_t requestID = 0,  Ipv4Address firstHop =
-                Ipv4Address (), Time lifetime = MilliSeconds (0));
+                Ipv4Address (), Time lifetime = MilliSeconds (0), uint32_t minResidualEnergy = 0.0 );
   ///\name Header serialization/deserialization
   //\{
   static TypeId GetTypeId ();
@@ -214,6 +218,8 @@ public:
   Ipv4Address GetFirstHop () const { return m_firstHop; }
   void SetLifeTime (Time t);
   Time GetLifeTime () const;
+  void SetMinResidualEnergy(uint32_t e) { m_minResidualEnergy = e; }
+  uint32_t GetMinResidualEnergy () const { return m_minResidualEnergy; }
   //\}
 
   ///\name Flags
@@ -238,6 +244,7 @@ private:
   uint32_t      m_requestID;
   Ipv4Address   m_firstHop;
   uint32_t      m_lifeTime;         ///< Lifetime (in milliseconds)
+  uint32_t      m_minResidualEnergy;       
 };
 
 std::ostream & operator<< (std::ostream & os, RrepHeader const &);
