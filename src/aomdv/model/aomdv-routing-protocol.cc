@@ -313,7 +313,7 @@ RoutingProtocol::AssignStreams (int64_t stream)
   m_uniformRandomVariable->SetStream (stream);
   return 1;
 }
-
+//may have to add a energy oject here
 void
 RoutingProtocol::Start ()
 {
@@ -355,7 +355,7 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
   RoutingTableEntry rt;
   if (m_routingTable.LookupValidRoute (dst, rt))
     {
-      RoutingTableEntry::Path *path = rt.PathFind ();
+      RoutingTableEntry::Path *path = rt.PathFind ();//! imp here as this is generating the path for outound packet at source
       route = path->GetRoute ();
       NS_ASSERT (route != 0);
       NS_LOG_DEBUG ("Exist route to " << route->GetDestination () << " from interface " << route->GetSource ());
@@ -509,7 +509,7 @@ RoutingProtocol::RouteInput (Ptr<const Packet> p, const Ipv4Header &header,
       RoutingTableEntry toOrigin;
       if (m_routingTable.LookupValidRoute (origin, toOrigin))
         {
-          UpdatePathsLifeTime (toOrigin.PathFind ()->GetNextHop (), m_activeRouteTimeout);
+          UpdatePathsLifeTime (toOrigin.PathFind ()->GetNextHop (), m_activeRouteTimeout);//todo changes only updating the first path
           m_nb.Update (toOrigin.PathFind ()->GetNextHop (), m_activeRouteTimeout);
         }
       if (lcb.IsNull () == false)
@@ -654,7 +654,7 @@ RoutingProtocol::NotifyInterfaceUp (uint32_t i)
   rt.PathInsert (/*device=*/ dev, /*nextHop=*/ iface.GetBroadcast (), /*hop=*/ 1, 
                  /*expireTime=*/ Simulator::GetMaximumSimulationTime (), 
                  /*lastHop=*/ iface.GetBroadcast (), 
-                 /*iface=*/ iface);
+                 /*iface=*/ iface, /* minResidualEnergy*/ 0);
 
   if (l3->GetInterface (i)->GetArpCache ())
     {
@@ -760,7 +760,7 @@ RoutingProtocol::NotifyAddAddress (uint32_t i, Ipv4InterfaceAddress address)
           rt.PathInsert (/*device=*/ dev, /*nextHop=*/ iface.GetBroadcast (), /*hop=*/ 1, 
                          /*expireTime=*/ Simulator::GetMaximumSimulationTime (), 
                          /*lastHop=*/ iface.GetBroadcast (), 
-                         /*iface=*/ iface);
+                         /*iface=*/ iface, /* minResidualEnergy*/ 0);
         }
     }
   else
@@ -822,7 +822,7 @@ RoutingProtocol::NotifyRemoveAddress (uint32_t i, Ipv4InterfaceAddress address)
           rt.PathInsert (/*device=*/ dev, /*nextHop=*/ iface.GetBroadcast (), /*hop=*/ 1, 
                          /*expireTime=*/ Simulator::GetMaximumSimulationTime (), 
                          /*lastHop=*/ iface.GetBroadcast (), 
-                         /*iface=*/ iface);
+                         /*iface=*/ iface, /* minResidualEnergy*/ 0);
         }
       if (m_socketAddresses.empty ())
         {
@@ -1114,7 +1114,7 @@ RoutingProtocol::UpdateRouteLifeTime (Ipv4Address addr, Time lifetime)
 }
 
 bool
-RoutingProtocol::UpdatePathsLifeTime (Ipv4Address addr, Time lifetime)
+RoutingProtocol::UpdatePathsLifeTime (Ipv4Address addr, Time lifetime)//todo when we are updating a path , we are updating all paths for a dest instead of a particular path
 {
   NS_LOG_FUNCTION (this << addr << lifetime);
   RoutingTableEntry rt;
@@ -1137,7 +1137,7 @@ RoutingProtocol::UpdatePathsLifeTime (Ipv4Address addr, Time lifetime)
     }
   return false;
 }
-
+//todo maybe energy for these one hop paths e eaqual to the energy of the node
 void
 RoutingProtocol::UpdateRouteToNeighbor (Ipv4Address sender, Ipv4Address receiver)
 {
@@ -1152,7 +1152,8 @@ RoutingProtocol::UpdateRouteToNeighbor (Ipv4Address sender, Ipv4Address receiver
       newEntry.PathInsert (/*device=*/ dev, /*nextHop=*/ sender, /*hop=*/ 1, 
                            /*expireTime=*/ m_activeRouteTimeout, 
                            /*lastHop=*/ sender, 
-                           /*iface=*/ m_ipv4->GetAddress (m_ipv4->GetInterfaceForAddress (receiver), 0));
+                           /*iface=*/ m_ipv4->GetAddress (m_ipv4->GetInterfaceForAddress (receiver), 0),
+                           /* minResidualEnergy*/ 0);
     }
   else
     {
@@ -1179,7 +1180,8 @@ RoutingProtocol::UpdateRouteToNeighbor (Ipv4Address sender, Ipv4Address receiver
           newEntry.PathInsert (/*device=*/ dev, /*nextHop=*/ sender, /*hop=*/ 1, 
                                /*expireTime=*/ std::max (m_activeRouteTimeout, toNeighbor.GetLifeTime ()), 
                                /*lastHop=*/ sender, 
-                               /*iface=*/ m_ipv4->GetAddress (m_ipv4->GetInterfaceForAddress (receiver), 0));
+                               /*iface=*/ m_ipv4->GetAddress (m_ipv4->GetInterfaceForAddress (receiver), 0),
+                              /* minResidualEnergy*/ 0);
         }
     }
 

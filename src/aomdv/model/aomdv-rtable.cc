@@ -245,6 +245,7 @@ RoutingTableEntry::PathEmpty (void) const
 }
 
 //todo have to change pathfind that is used in route input output methods in routing protocol
+//* we have to change this method only
 struct RoutingTableEntry::Path * 
 RoutingTableEntry::PathFind (void) 
 {
