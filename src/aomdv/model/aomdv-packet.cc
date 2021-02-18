@@ -284,9 +284,9 @@ RreqHeader::operator== (RreqHeader const & o) const
 //-----------------------------------------------------------------------------
 
 RrepHeader::RrepHeader (uint8_t prefixSize, uint8_t hopCount, Ipv4Address dst,
-                        uint32_t dstSeqNo, Ipv4Address origin, uint32_t requestID, Ipv4Address firstHop, Time lifeTime, uint32_t minResidualEnerdy)  :
+                        uint32_t dstSeqNo, Ipv4Address origin, uint32_t requestID, Ipv4Address firstHop, Time lifeTime, uint32_t minResidualEnergy)  :
   m_flags (0), m_prefixSize (prefixSize), m_hopCount (hopCount),
-  m_dst (dst), m_dstSeqNo (dstSeqNo), m_origin (origin), m_requestID (requestID), m_firstHop (firstHop), m_minResidualEnergy (minResidualEnerdy)
+  m_dst (dst), m_dstSeqNo (dstSeqNo), m_origin (origin), m_requestID (requestID), m_firstHop (firstHop), m_minResidualEnergy (minResidualEnergy)
 {
   m_lifeTime = uint32_t (lifeTime.GetMilliSeconds ());
 }
