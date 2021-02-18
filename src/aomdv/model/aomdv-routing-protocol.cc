@@ -453,7 +453,8 @@ RoutingProtocol::RouteInput (Ptr<const Packet> p, const Ipv4Header &header,
     {
       Ipv4InterfaceAddress iface = j->second;
       if (m_ipv4->GetInterfaceForAddress (iface.GetLocal ()) == iif)
-        if (dst == iface.GetBroadcast () || dst.IsBroadcast ())
+        {
+          if (dst == iface.GetBroadcast () || dst.IsBroadcast ())
           {
             if (m_dpd.IsDuplicate (p, header))
               {
@@ -477,6 +478,16 @@ RoutingProtocol::RouteInput (Ptr<const Packet> p, const Ipv4Header &header,
               {
                 return true;
               }
+            if (header.GetProtocol () == UdpL4Protocol::PROT_NUMBER)
+              {
+                UdpHeader udpHeader;
+                p->PeekHeader (udpHeader);
+                if (udpHeader.GetDestinationPort () == AODV_PORT)
+                  {
+                    // AODV packets sent in broadcast are already managed
+                    return true;
+                  }
+              }
             if (header.GetTtl () > 1)
               {
                 NS_LOG_LOGIC ("Forward broadcast. TTL " << (uint16_t) header.GetTtl ());
@@ -498,6 +509,7 @@ RoutingProtocol::RouteInput (Ptr<const Packet> p, const Ipv4Header &header,
               }
             return true;
           }
+      }
     }
 
   // Unicast local delivery
@@ -1231,7 +1243,7 @@ RoutingProtocol::RecvRequest (Ptr<Packet> p, Ipv4Address receiver, Ipv4Address s
       rreqHeader.SetFirstHop (receiver);
       //rq->rq_first_hop = index;
     }
-  // Increment RREQ hop count
+  // Increment RREQ hop count//todo
   uint8_t hop = rreqHeader.GetHopCount () + 1;
   //rreqHeader.SetHopCount (hop);
 
@@ -1255,7 +1267,7 @@ RoutingProtocol::RecvRequest (Ptr<Packet> p, Ipv4Address receiver, Ipv4Address s
       reversePath = newEntry.PathInsert (dev, src, rreqHeader.GetHopCount ()+1, 
                            Time ((2 * m_netTraversalTime - 2 * hop * m_nodeTraversalTime)), 
                            rreqHeader.GetFirstHop (), 
-                           m_ipv4->GetAddress (m_ipv4->GetInterfaceForAddress (receiver), 0));
+                           m_ipv4->GetAddress (m_ipv4->GetInterfaceForAddress (receiver), 0), /*minResidualEnergy*/);
     }
   else
     {
