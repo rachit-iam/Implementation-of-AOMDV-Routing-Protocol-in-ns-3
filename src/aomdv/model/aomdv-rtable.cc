@@ -71,7 +71,7 @@ RoutingTableEntry::Path::Print (Ptr<OutputStreamWrapper> stream) const
  */
 
 RoutingTableEntry::RoutingTableEntry (Ipv4Address dst, bool vSeqNo, uint32_t seqNo, Time lifetime) :
-  m_ackTimer (Timer::CANCEL_ON_DESTROY),
+  m_ackTimer (Timer::CANCEL_ON_DESTROY), m_dst(dst) ,
   m_validSeqNo (vSeqNo), m_seqNo (seqNo), 
   m_lifeTime (lifetime + Simulator::Now ()), m_flag (VALID), m_reqCount (0), 
   m_blackListState (false), m_blackListTimeout (Simulator::Now ()),
@@ -271,7 +271,7 @@ RoutingTableEntry::PathFindMinHop (void)
   }
   return path;
 }
-//todo similarly for energy
+// similarly for energy
 uint16_t 
 RoutingTableEntry::PathGetMaxHopCount (void)
 {
@@ -306,6 +306,42 @@ RoutingTableEntry::PathGetMinHopCount (void)
   }
   return minHopCount;
 }  
+
+// similarly for energy
+uint32_t 
+RoutingTableEntry::PathGetMaxMinResidualEnergy (void)
+{
+  uint32_t maxMinResidualEnergy = 0;
+  for (std::vector<Path>::iterator i = m_pathList.begin (); i!= m_pathList.end (); ++i)
+  {
+    if (i->m_MinResidualEnergy > maxMinResidualEnergy)
+    {
+      maxMinResidualEnergy = i->m_MinResidualEnergy;
+    }
+  }
+  if(maxMinResidualEnergy == 0) 
+    {  
+      return INFINITY3;
+    }
+  else 
+    {
+      return maxMinResidualEnergy;
+    }
+} 
+
+uint32_t 
+RoutingTableEntry::PathGetMinMinResidualEnergy (void)
+{
+  uint32t minMinResidualEnergy = INFINITY3;//todo define infinity3
+  for (std::vector<Path>::iterator i = m_pathList.begin (); i!= m_pathList.end (); ++i)
+  {
+    if (i->m_MinResidualEnergy < minMinResidualEnergy)
+    {
+      minMinResidualEnergy = i->m_MinResidualEnergy;
+    }
+  }
+  return minMinResidualEnergy;
+} 
 
 Time 
 RoutingTableEntry::PathGetMaxExpirationTime (void)

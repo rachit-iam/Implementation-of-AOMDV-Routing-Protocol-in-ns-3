@@ -133,6 +133,8 @@ public:
   struct Path* PathFindMinHop (void);            // find the shortest path
   uint16_t PathGetMaxHopCount (void);  
   uint16_t PathGetMinHopCount (void);  
+  uint32_t PathGetMaxMinResidualEnergy (void);  
+  uint32_t PathGetMinMinResidualEnergy (void);
   Time PathGetMaxExpirationTime (void); 
   void PathPurge (void);
   //TODO ADD SOME FUNCTIONS FOR ENERGY ALSO
@@ -204,7 +206,10 @@ public:
   uint32_t GetNumberofPaths () const { return m_numPaths; }
   void SetError (bool e) { m_error = e; }
   bool IsError () const { return m_error; }
-
+  void SetLastMinResidualEnergy (uint32_t lmre ) { m_lastMinResidualEnergy = lmre; }
+  uint32_t GetLastMinResidualEnergy () const { return m_lastMinResidualEnergy; }
+  void SetAdvertisedMinResidualEnergy (uint32_t amre ) { m_advertisedMinResidualEnergy = amre; } //TODO HAVE TO MAKE SOME TYPE OF ADVERTISED MIN_RESIDUAL_ENERGY
+  uint32_t GetAdvertisedMinResidualEnergy () const { return m_advertisedMinResidualEnergy; }
   /// RREP_ACK timer
   Timer m_ackTimer;
   //\}
@@ -255,6 +260,8 @@ private:
   uint16_t  m_advertisedHopCount;//TODO ADVERTISED ENERGY SAME LIKE HOP COUNT
   uint32_t  m_highestSeqnoHeard;
   uint32_t  m_lastHopCount;  
+  uint16_t  m_advertisedMinResidualEnergy;
+  uint32_t  m_lastMinResidualEnergy;
   int  m_numPaths;
   bool  m_error;
 };
