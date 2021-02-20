@@ -1699,7 +1699,7 @@ RoutingProtocol::RecvReply (Ptr<Packet> p, Ipv4Address receiver, Ipv4Address sen
           toDst.PathAllDelete ();
           toDst.SetFlag (VALID);
           /* Insert forward path to RREQ destination. */
-          forwardPath = toDst.PathInsert (dev, rrepHeader.GetOrigin (), hop, 
+          forwardPath = toDst.PathInsert (dev, sender, hop, 
                                           Simulator::Now() + rrepHeader.GetLifeTime (), rrepHeader.GetFirstHop (),
                                           m_ipv4->GetAddress (m_ipv4->GetInterfaceForAddress (receiver), 0), rrepHeader.GetMinResidualEnergy() );
 	  // CHANGE
@@ -1725,7 +1725,7 @@ RoutingProtocol::RecvReply (Ptr<Packet> p, Ipv4Address receiver, Ipv4Address sen
                     && (hop - toDst.PathGetMinHopCount () <= AOMDV_PRIM_ALT_PATH_LENGTH_DIFF))
             {
               /* Insert forward path to RREQ destination. */
-              forwardPath = toDst.PathInsert (dev, rrepHeader.GetOrigin (), hop, 
+              forwardPath = toDst.PathInsert (dev, sender, hop, 
                                               Simulator::Now() + rrepHeader.GetLifeTime (), 
                                               rrepHeader.GetFirstHop (),
                                               m_ipv4->GetAddress (m_ipv4->GetInterfaceForAddress (receiver), 0),
